@@ -4,7 +4,10 @@ import pandas as pd
 
 from adalinegd import AdalineGD
 
-s = '/home/user/Документы/Projects/Python/pml/perceptron/iris.data'
+# s = '/home/user/Документы/Projects/Python/pml/perceptron/iris.data'
+from commons import plot_decision_regions
+
+s = r'C:\Users\maxim.korolev\PycharmProjects\pml\perceptron\iris.data'
 print('URL: ', s)
 df = pd.read_csv(s, header=None, encoding='utf-8')
 y = df.iloc[0: 100, 4].values
@@ -26,4 +29,26 @@ ax[1].set_xlabel('Эпохи')
 ax[1].set_ylabel('log(Cyммa квадратичных ошибок)')
 ax[1].set_title('Adaline - скорость обучения 0.0001')
 
+plt.show()
+
+X_std = np.copy(X)
+X_std[:, 0] = (X[:, 0] - X[:, 0].mean()) / X[:, 0].std()
+X_std[:, 1] = (X[:, 1] - X[:, 1].mean()) / X[:, 1].std()
+
+ada_gd = AdalineGD(n_iter=15, eta=0.01)
+ada_gd.fit(X_std, y)
+
+plot_decision_regions(X_std, y, classifier=ada_gd)
+plot_decision_regions(X_std, y, classifier=ada_gd)
+plt.title('Adaline - градиентный спуск')
+plt.xlabel('дпина чашелистика [стандартизированная]')
+plt.ylabel('длина лепестка [стандартизированная]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+plt.plot(range(1, len(ada_gd.cost_) + 1), ada_gd.cost_, marker='o')
+plt.xlabel('Эпохи')
+plt.ylabel('Сумма квадратичных ошибок')
+plt.tight_layout()
 plt.show()
