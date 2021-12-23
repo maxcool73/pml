@@ -7,9 +7,13 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 from sklearn.linear_model import SGDClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
+from pydotplus import graph_from_dot_data
 
 from loqisticregressiongd import LogisticRegressionGD
 
@@ -212,6 +216,40 @@ plot_decision_regions(X_combined,
                       test_idx=range(105, 150))
 plt.xlabel('длина лепестка [см]')
 plt.ylabel('ширина лепестка [см]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+dot_data = export_graphviz(tree_model,
+                           filled=True,
+                           rounded=True,
+                           class_names=['Setosa',
+                                        'Versicolor',
+                                        'Virginica'],
+                           feature_names=['petal length',
+                                          'petal width'],
+                           out_file=None)
+graph = graph_from_dot_data(dot_data)
+graph.write_png('tree.png')
+
+forest = RandomForestClassifier(criterion='gini',
+                                n_estimators=25,
+                                random_state=1,
+                                n_jobs=2)
+forest.fit(X_train, y_train)
+plot_decision_regions(X_combined, y_combined,
+                      classifier=forest, test_idx=range(105, 150))
+plt.xlabel('длина лепестка [см]')
+plt.ylabel('ширина лепестка [см]')
+plt.legend(loc='upper left')
+plt.tight_layout()
+plt.show()
+
+knn = KNeighborsClassifier(n_neighbors=5, p=2, metric='minkowski')
+knn.fit(X_train_std, y_train)
+plot_decision_regions(X_combined_std, y_combined, classifier=knn, test_idx=range(105, 150))
+plt.xlabel('длина лепестка [стандартизированная]')
+plt.ylabel('ширина лепестка [стандартизированная]')
 plt.legend(loc='upper left')
 plt.tight_layout()
 plt.show()
