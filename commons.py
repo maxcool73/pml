@@ -1,6 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
+from numpy import exp
+from scipy.linalg import eigh
+from scipy.spatial.distance import pdist, squareform
 
 
 def plot_decision_regions(X, y, classifier, resolution=0.02):
@@ -29,3 +32,81 @@ def plot_decision_regions(X, y, classifier, resolution=0.02):
                     marker=markers[idx],
                     label=cl,
                     edgecolor='black')
+
+
+def rbf_kernel_pca(X, gamma, n_components):
+    """Реализация алгоритма РСА с ядром RBF.
+    Параметры
+    ---------
+    Х: {NumPy ndarray}, форма[n_examples, n_features]
+    gamma: float
+        Параметр настройки ядра RBF
+    n_components: int
+        Количество главных компонентов, подлежащих возвращению
+    Возвращает
+    Х_рс: {NumPy ndarray}, форма= {n_examples, k_features}
+        Спроецированный набор данных
+    """
+    # Вычислить попарные квадратичные евклидовы расстояния
+    # в МхN-мерном наборе данных.
+    sq_dists = pdist(X, 'sqeuclidean')
+    # Преобразовать попарные расстояния в квадратную матрицу.
+    mat_sq_dists = squareform(sq_dists)
+    # Вычислить симметричную матрицу ядра.
+    K = exp(-gamma * mat_sq_dists)
+    # Центрировать матрицу ядра.
+    N = K.shape[0]
+    one_n = np.ones((N, N)) / N
+    K = K - one_n.dot(K) - K.dot(one_n) + one_n.dot(K).dot(one_n)
+    # Получить собственные пары из центрированной матрицы ядра;
+    # scipy. linalg. eigh возвращает их в порядке по возрастанию.
+    eigvals, eigvecs = eigh(K)
+    eigvals, eigvecs = eigvals[::-1], eigvecs[:, ::-1]
+    # Собрать верхние k собственных векторов (спроецированных образцов).
+    X_pc = np.column_stack([eigvecs[:, i] for i in range(n_components)])
+    return X_pc
+
+
+def rbf_kernel_pca2(X, gamma, n_components):
+    """Реализация алгоритма РСА с ядром RBF.
+    Параметры
+    ---------
+    Х: {NumPy ndarray}, форма[n_examples, n_features]
+    gamma: float
+        Параметр настройки ядра RBF
+    n_components: int
+        Количество главных компонентов, подлежащих возвращению
+    Возвращает
+    ----------
+    alphas: {NumPy ndarray}, форма
+        Спроецированный набор данных
+    lambdas: список
+        Собственные значения
+    """
+    # Вычислить попарные квадратичные евклидовы расстояния
+    # в МхN-мерном наборе данных.
+    sq_dists = pdist(X, 'sqeuclidean')
+    # Преобразовать попарные расстояния в квадратную матрицу.
+    mat_sq_dists = squareform(sq_dists)
+    # Вычислить симметричную матрицу ядра.
+    K = exp(-gamma * mat_sq_dists)
+    # Центрировать матрицу ядра.
+    N = K.shape[0]
+    one_n = np.ones((N, N)) / N
+    K = K - one_n.dot(K) - K.dot(one_n) + one_n.dot(K).dot(one_n)
+    # Получить собственные пары из центрированной матрицы ядра;
+    # scipy. linalg. eigh возвращает их в порядке по возрастанию.
+    eigvals, eigvecs = eigh(K)
+    eigvals, eigvecs = eigvals[::-1], eigvecs[:, ::-1]
+    # Собрать верхние k собственных векторов
+    # (спроецированных образцов).
+    alphas = np.column_stack([eigvecs[:, i] for i in range(n_components)])
+    # Собрать соответствующие собственные значения.
+    lambdas = [eigvals[i] for i in range(n_components)]
+    return alphas, lambdas
+
+
+def project_x(x_new, X, gamma, alphas, lambdas):
+    pair_dist = np.array([np.sum((x_new - row) ** 2) for row in X])
+    k = np.exp(-gamma * pair_dist)
+    return k.dot(alphas / lambdas)
