@@ -1,3 +1,6 @@
+import math
+from math import comb
+
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -110,3 +113,12 @@ def project_x(x_new, X, gamma, alphas, lambdas):
     pair_dist = np.array([np.sum((x_new - row) ** 2) for row in X])
     k = np.exp(-gamma * pair_dist)
     return k.dot(alphas / lambdas)
+
+
+def ensemble_error(n_classifier, error):
+    k_start = int(math.ceil(n_classifier / 2.))
+    probs = [comb(n_classifier, k) *
+             error ** k *
+             (1 - error) ** (n_classifier - k)
+             for k in range(k_start, n_classifier + 1)]
+    return sum(probs)
