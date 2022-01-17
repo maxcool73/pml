@@ -1,5 +1,6 @@
 import math
 from math import comb
+import re
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -122,3 +123,9 @@ def ensemble_error(n_classifier, error):
              (1 - error) ** (n_classifier - k)
              for k in range(k_start, n_classifier + 1)]
     return sum(probs)
+
+def preprocessor (text):
+    text = re.sub( '<[^>]*>', '', text)
+    emoticons = re.findall ('(?::|;|=) (?:-)?(?:\)|\(|D|Р)', text)
+    text = (re.sub('[\W]+', ' ', text.lower()) + ' '.join(emoticons).replace('-', ''))
+    return text
