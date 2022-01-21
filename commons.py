@@ -124,8 +124,13 @@ def ensemble_error(n_classifier, error):
              for k in range(k_start, n_classifier + 1)]
     return sum(probs)
 
-def preprocessor (text):
-    text = re.sub( '<[^>]*>', '', text)
-    emoticons = re.findall ('(?::|;|=) (?:-)?(?:\)|\(|D|Р)', text)
+
+def preprocessor(text):
+    text = re.sub('<[^>]*>', '', text)
+    emoticons = re.findall('(?::|;|=) (?:-)?(?:\)|\(|D|Р)', text)
     text = (re.sub('[\W]+', ' ', text.lower()) + ' '.join(emoticons).replace('-', ''))
     return text
+
+
+def tokenizer(text):
+    return text.split()
